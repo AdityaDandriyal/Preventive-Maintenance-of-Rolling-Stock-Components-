@@ -234,8 +234,151 @@ Plate, Top Security Wire, Vertical Bolt, Vertical Nut and Washer.
 • **Object Detection using YOLOv8 nano and small models on the original dataset**
 
 Object Detection by training the YOLOv8 nano and small model on the original
-dataset with a 80:20 train-validation split gives the result as shown in the following table
+dataset with a 80:20 train-validation split gives the result as shown in the following table:
 
 
 ![image](https://github.com/user-attachments/assets/f1fa6577-8106-42f2-9139-980aaaf5478f)
 
+![image](https://github.com/user-attachments/assets/5136f417-fad0-42f7-b3d5-0ebe915d4089)
+
+      Precision-Recall curve for YOLOv8 nano model for original dataset
+
+![image](https://github.com/user-attachments/assets/b6a2cc19-58e5-463b-9a54-af726c33b121)
+
+       Precision-Recall curve for YOLOv8 small model for original dataset
+
+The models are not giving very good overall performance on the original dataset and
+give extremely **poor performance** for 3 particular object classes: **Bolt Thread, Security Plate Bolt and Top Security Wire**.
+
+As a product for object detection in extreme guiding components of rolling stock,
+the model should give good performance for all of the object classes.
+
+
+
+**DATA PREPARATION PIPELINE: Extended Dataset**
+
+As our dataset is very small, to extend the dataset, augmentation techniques
+were used to generate potential use cases that are observed in images of rolling stock
+components. Also, the augmentation of training and validation set is done separately
+so as to avoid any data leakage.
+
+Further to find the optimal pre-processing technique we generate 3 sets of data, normal, 
+histogram equalized and contrast limited adaptive histogram equalized.
+
+The Testing set is taken from a batch of data different from the original dataset,
+obtained at a later time. The **data preparation pipeline** is shown in the figure below:
+
+![image](https://github.com/user-attachments/assets/936e788d-1b70-4358-8109-b02e7523ea70)
+
+The extended dataset’s **train, validation and test split** and the **object class data distribution** is shown in the table 
+and figure below respectively:
+
+![image](https://github.com/user-attachments/assets/ac2ccc6e-4257-435c-bfc0-3d940659204e)
+
+![image](https://github.com/user-attachments/assets/fc424858-c3bd-4562-83a1-328793a0bc2f)
+
+
+**EXPERIMENTAL EVALUATION: Extended Dataset**
+
+• **Finding the Optimal Image Contrast Enhancement Technique**
+
+Since the images for the rolling stock generally suffer from poor contrast, thus
+for pre-processing contrast enhancement techniques are being considered to improve
+the object detection performance of YOLOv8 model.
+
+Two techniques were considered namely **Histogram Equalization** and **Contrast Limited Adaptive Histogram Equalization (CLAHE)** and the performance of YOLOv8 object detection model both nano and small, were compared on all 3 generated dataset
+(one normal and two enhanced).
+
+• **YOLOv8 nano object detection results**
+
+The results for YOLOv8-nano on the 3 datasets is shown in table along with
+the class wise performance shown using precision recall curves
+for normal, histogram equalized and clahe dataset respectively.
+
+![image](https://github.com/user-attachments/assets/e446b2c4-b145-4ed7-b147-e5e6834d621a)
+
+![image](https://github.com/user-attachments/assets/66900ecb-205e-4125-8baf-ce6894d7b540)
+
+        Precision-Recall curve for YOLOv8 nano on HE dataset
+
+
+• **YOLOv8 small object detection results**
+
+The results for YOLOv8-small on the 3 datasets is shown in table along with the
+class wise performance shown using precision recall curves
+for normal, histogram equalized and clahe dataset respectively.
+
+![image](https://github.com/user-attachments/assets/a5254432-62ff-457d-8471-79a81e29a1ca)
+
+![image](https://github.com/user-attachments/assets/05a1ecf4-25aa-43eb-a560-86257cd6ed20)
+
+      Precision-Recall curve for YOLOv8 small on HE dataset
+
+Upon analysing it is seen that both YOLOv8 nano and small models produce best
+overall and class wise results for **histogram equalized dataset**. Thus, for the extreme
+guiding dataset histogram equalization is the best image pre-processing technique.
+
+
+**QUANTITATIVE ANALYSIS of YOLOv8 Nano + Attention Modules**
+
+This analysis is done using a histogram equalized dataset with the following tuned hyperparameters: Optimizer- Adam, Epochs- 150, 
+Learning Rate- 0.001, Image-size- 960.
+
+![image](https://github.com/user-attachments/assets/424d121b-f2f0-440d-9949-4c9ce072da82)
+
+This table showcases the performance of YOLOv8 nano model with different attention modules. We can see that **YOLOv8 nano model with attention modules does not show any improvement over the baseline**.
+
+**QUANTITATIVE ANALYSIS of YOLOv8 Small + Attention Modules**
+
+This analysis is done using a histogram equalized dataset with the following tuned hyperparameters: Optimizer- Adam, Epochs- 150, 
+Learning Rate- 0.001, Image-size- 960.
+
+![image](https://github.com/user-attachments/assets/8a3dbcda-fb0e-40c8-add8-368caa9bb5fc)
+
+This table showcases the performance of YOLOv8 small model with different
+attention modules. We can see that the **ResBlock + CBAM** and the **ECA**
+attention modules are **giving better overall mAP** than the baseline model.
+
+**QUALITATIVE ANALYSIS on TEST SET using YOLOv8 small model**
+
+Here we compare the qualitative performance of the **YOLOv8 small baseline**
+model and the model utilizing the **ResBlock+CBAM attention** module.
+
+Specifically we compare their performance on the **3 object classes** namely **Bolt thread, Top
+Security wire** and **Security Plate Bolt**, which were initially very difficult to detect and
+accurately localize.
+
+![image](https://github.com/user-attachments/assets/32a4c2ce-8944-4cd6-b515-ea70087a77e5)
+
+            Qualitative Results using YOLOv8 baseline
+
+![image](https://github.com/user-attachments/assets/90a77793-23bb-4296-8be0-0ed21fe4aa31)
+
+        Qualitative Results using YOLOv8 with ResBlock + CBAM attention
+
+From the figures we can see that even though the **baseline model** is able to detect
+all the 3 object classes but it is not able to do so with good localization accuracy as
+we can see that it gives multiple bounding boxes for the same object. On the other
+hand the **YOLOv8 model with ResBlock + CBAM** attention module gives **better confidence score** and
+**shows far greater object localization accuracy**.
+
+**CONCLUSION**
+
+• **Histogram Equalization** is the best image contrast enhancement technique for
+the extreme guiding dataset for object detection task.
+
+• Adding attention modules to the YOLOv8 nano model didn’t result in any
+improvement over the baseline model.
+
+• As for the YOLOv8 small model, two attention modules ResBlock + CBAM 
+and ECA showed better performance than the baseline model.
+
+• The attention modules not showing any improvement for the nano model could
+be due to the **model not being deep enough** to make the most out of the feature
+extraction.
+
+• **We also saw that though using attention modules improved the performance of
+the model but it also caused a increase in the inference time**. Thus, there exists
+a trade-off between performance enhancement and reducing the inference time
+and subsequently the processing time of the model, and thus the choice of a
+particular model depends on the requirements of the customer.
